@@ -24,7 +24,7 @@ app
     httpsServer.listen(port, () => {
       console.log("> ready on " + process.env.APPS_DOMAIN + ":" + port);
       console.log("> environment: " + process.env.APPS_ENVIRONMENT);
-      console.log(process.env);
+      // console.log(process.env);
     });
   })
   .catch((err) => {
