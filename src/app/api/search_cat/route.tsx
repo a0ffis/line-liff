@@ -13,12 +13,12 @@ export async function GET(req: NextRequest, _res: NextResponse<ResponseData>) {
           "x-api-key": process.env.CAT_API_KEY,
         },
         params: {
-          size: "med",
+          size: "small",
           order: "RANDOM",
           has_breeds: true,
           include_breeds: 1,
           include_categories: 1,
-          limit: 100,
+          limit: 25,
         },
       },
     );

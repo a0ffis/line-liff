@@ -9,7 +9,7 @@ type ResponseData = {
 export async function POST(req: NextRequest, _res: NextResponse<ResponseData>) {
   try {
     const { userId, message } = await req.json();
-    const result = await sendMessageFlex(message, userId);
+    const result = await sendMessage(message, userId);
     console.log("result", result);
     return NextResponse.json({
       success: true,

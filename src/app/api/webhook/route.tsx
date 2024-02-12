@@ -18,6 +18,10 @@ export async function POST(req: NextRequest, _res: NextResponse<ResponseData>) {
       message = "สวัสดีคนสวย";
     }
 
+    if (message == "hi") {
+      message = "https://liff.line.me/2003144401-PLEBegWd";
+    }
+
     const result = await sendMessage(message, userId);
     console.log(result.data);
 

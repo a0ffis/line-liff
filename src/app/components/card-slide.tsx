@@ -9,15 +9,21 @@ import {
   HeartTwoTone,
 } from "@ant-design/icons";
 
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/opacity.css";
+import Image from "next/image";
+
 type Props = {
   header: string;
   items: any[] | null;
   add_favorite: Function;
+  add_cart: Function;
   favorite: any[];
+  cart: any[];
 };
 
 const CardSlide = (props: Props) => {
-  const { header, items, add_favorite, favorite } = props;
+  const { header, items, add_favorite, add_cart, favorite } = props;
 
   return (
     <>
@@ -33,18 +39,27 @@ const CardSlide = (props: Props) => {
             return (
               <div
                 key={item.id}
-                className="flex flex-col w-[50vw] rounded-lg snap-center cursor-pointer shadow transition ease-in-out duration-300 hover:shadow-lg relative"
+                className="flex flex-col w-[50vw] rounded-lg h-full snap-center cursor-pointer shadow transition ease-in-out duration-300 hover:shadow-lg relative"
               >
-                <div className="overflow-hidden rounded-lg h-full min-w-[50vw]">
+                <div className="overflow-hidden rounded-lg -h-full min-w-[50vw]">
+                  <LazyLoadImage
+                    effect="opacity"
+                    src={item?.url}
+                    width="100%"
+                    style={{
+                      aspectRatio: "1/1",
+                      objectFit: "cover",
+                    }}
+                  />
+                  {/* <div */}
+                  {/*   className="pt-[100%] w-full bg-cover bg-center" */}
+                  {/*   style={{ backgroundImage: `url(${item?.url})` }} */}
+                  {/* ></div> */}
                   <div
-                    className="pt-[100%] w-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${item?.url})` }}
-                  ></div>
-                  <div
-                    className="p-3 h-[38%] flex flex-col justify-between"
+                    className="p-3 -h-[38%] flex flex-col justify-between"
                     style={{ width: "inherit" }}
                   >
-                    <h1 className="text-lg font-bold text-gray-800">
+                    <h1 className="text-lg font-bold text-gray-800 truncate">
                       {item.breeds[0].name}
                     </h1>
                     <div className="text-xs overflow-hidden truncate-2-lines text-gray-500">
@@ -56,7 +71,13 @@ const CardSlide = (props: Props) => {
                       <h2 className="font-bold text-xl text-indigo-700">
                         ${item.breeds[0].price}
                       </h2>
-                      <ShoppingCartOutlined className="text-gray-400 text-2xl hover:text-indigo-700 transition ease-in-out duration-300 cursor-pointer" />
+                      <div
+                        onClick={() => {
+                          add_cart(item);
+                        }}
+                      >
+                        <ShoppingCartOutlined className="text-gray-400 text-2xl hover:text-indigo-700 transition ease-in-out duration-300 cursor-pointer" />
+                      </div>
                     </div>
                   </div>
 
