@@ -24,13 +24,17 @@ import {
   ShoppingCartOutlined,
   HeartTwoTone,
   SearchOutlined,
+  MinusCircleOutlined,
   CloseOutlined,
+  PlusCircleOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import CardSlide from "./components/card-slide";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/opacity.css";
 import "react-lazy-load-image-component/src/effects/blur.css";
+import { Miss_Fajardose, NTR } from "next/font/google";
+import { ClientReferenceManifestPlugin } from "next/dist/build/webpack/plugins/flight-manifest-plugin";
 
 const LIFF_ID = process.env.LIFF_ID || "2003144401-PLEBegWd";
 
@@ -146,6 +150,7 @@ export default function Home() {
         // item.breeds[0]["price"] = Math.floor(Math.random() * 1000);
         item.breeds[0]["price"] ||
           (item.breeds[0]["price"] = Math.floor(Math.random() * 1000));
+        item.quantity = 1;
       });
 
       // console.log(res.data.data);
@@ -202,6 +207,9 @@ export default function Home() {
     setModalOpen(true);
   }
 
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
   return (
     <>
       {user ? (
@@ -232,7 +240,7 @@ export default function Home() {
               }
             >
               <div className="flex items-center gap-4">
-                <Avatar size={64} />
+                <Avatar size={64} src={user.pictureUrl} />
                 <div>
                   <h1 className="text-2xl font-bold">{user.displayName}</h1>
                 </div>
@@ -252,17 +260,17 @@ export default function Home() {
 
             <div
               id="cart"
-              className={modalType == "cart" ? "h-full" : "hidden"}
+              className={modalType == "cart" ? "-h-full relative" : "hidden"}
             >
-              <div className="flex flex-col items-between h-full">
-                <div className="row-span-1 flex flex-col items-center gap-4 -justify-center">
+              <div className="flex flex-col items-between">
+                <div className="flex flex-col items-center gap-4 -justify-center mb-24">
                   {cart.map((item: any, _index: number) => {
                     return (
                       <div
                         key={item.id}
-                        className="grid grid-cols-5 gap-4 w-full rounded-xl p-3 bg-indigo-50 overflow-hidden"
+                        className="grid grid-cols-12 gap-4 w-full rounded-xl p-3 bg-indigo-50 overflow-hidden"
                       >
-                        <div className="col-span-2 h-full">
+                        <div className="col-span-3 h-full">
                           <div className="flex w-full relative rounded-xl overflow-hidden">
                             <LazyLoadImage
                               effect="opacity"
@@ -272,14 +280,35 @@ export default function Home() {
                             <div className="aspect-square w-full h-full bg-gray-100"></div>
                           </div>
                         </div>
-                        <div className="w-full col-span-3">
-                          <h1 className=" font-bold text-gray-800 truncate">
-                            {item.breeds[0].name}
-                          </h1>
-                          <div className="text-xs overflow-hidden truncate text-gray-500">
-                            <p className="inline">
-                              {item.breeds[0].description || "-"}
+                        <div className="w-full col-span-8 flex flex-col justify-between">
+                          <div>
+                            <h1 className=" font-bold text-gray-800 truncate">
+                              {item.breeds[0].name}
+                            </h1>
+                            <p className="text-lg font-bold text-indigo-600">
+                              ${item.breeds[0].price * item.quantity || 1}
                             </p>
+                          </div>
+                          <div className="flex">
+                            <div className="flex items-center gap-2">
+                              <MinusCircleOutlined
+                                className="text-lg cursor-pointer"
+                                onClick={() => {
+                                  cart[cart.indexOf(item)].quantity > 1
+                                    ? cart[cart.indexOf(item)].quantity--
+                                    : cart.splice(cart.indexOf(item), 1);
+                                  setCart([...cart]);
+                                }}
+                              />
+                              {cart[cart.indexOf(item)].quantity}
+                              <PlusCircleOutlined
+                                onClick={() => {
+                                  cart[cart.indexOf(item)].quantity++;
+                                  setCart([...cart]);
+                                }}
+                                className="text-lg cursor-pointer"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -287,13 +316,21 @@ export default function Home() {
                   })}
                 </div>
               </div>
-              <div className="row-auto">
-                <Space.Compact className="w-full" size="large">
+              <div
+                className="fixed bottom-2 relative"
+                style={{ margin: "-1.5rem" }}
+              >
+                <Space.Compact
+                  className="w-full fixed bottom-0 p-4 bg-indigo-50 rounded shadow-lg"
+                  size="large"
+                  style={{ width: "inherit" }}
+                >
                   <Button
                     type="primary"
                     className="w-full bg-indigo-500 hover:bg-indigo-600"
                     onClick={() => {
                       sendFlexMessage(cart);
+                      setModalOpen(false);
                     }}
                   >
                     Checkout
@@ -303,10 +340,13 @@ export default function Home() {
             </div>
           </Drawer>
           {contextHolder}
-          <div className="container mx-auto relative pt-2 pb-8 mb-14 max-w-[478px],">
+          <div
+            id="home"
+            className="container mx-auto relative pt-2 pb-8 mb-14 max-w-[478px] scroll-smooth"
+          >
             <Space.Compact className="w-full p-4 pb-2" size="large">
               <div className="flex items-center gap-4">
-                <Avatar size={64} />
+                <Avatar size={64} src={user.pictureUrl} />
                 <div>
                   <h1 className="text-2xl font-bold">{user.displayName}</h1>
                   <p className="text-gray-500">The Cat API.</p>
@@ -361,7 +401,12 @@ export default function Home() {
             <div className="fixed w-full bottom-0 left-0 p-6">
               <div className="relative rounded-full overflow-hidden shadow-lg">
                 <div className="relative bg-indigo-200 bg-opacity-50 backdrop-blur-lg grid grid-cols-4 justify-center items-center justify-items-center overflow-hidden gap-2 w-full h-16">
-                  <div style={{ cursor: "pointer" }}>
+                  <div
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      scrollToTop();
+                    }}
+                  >
                     <Badge size="small">
                       <HomeOutlined className="cursur-pointer text-xl text-gray-500 hover:text-gray-500 transition ease-in-out duration-300" />
                     </Badge>{" "}
