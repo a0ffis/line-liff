@@ -32,8 +32,7 @@ import axios from "axios";
 import CardSlide from "./components/card-slide";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/opacity.css";
-import "react-lazy-load-image-component/src/effects/blur.css";
-import { Miss_Fajardose, NTR } from "next/font/google";
+import { Are_You_Serious, Miss_Fajardose, NTR } from "next/font/google";
 import { ClientReferenceManifestPlugin } from "next/dist/build/webpack/plugins/flight-manifest-plugin";
 
 const LIFF_ID = process.env.LIFF_ID || "2003144401-PLEBegWd";
@@ -51,9 +50,10 @@ export default function Home() {
   const [messageApi, contextHolder] = message.useMessage();
   const [favorite, setFavorite] = useState<any[]>([]);
   const [cart, setCart] = useState<any[]>([]);
+  const [detail, setDetail] = useState<any[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<
-    "favorite" | "cart" | "profile" | ""
+    "favorite" | "cart" | "profile" | "" | "detail"
   >("");
   const [modalPosition, setModalPosition] = useState<
     "left" | "right" | "bottom"
@@ -177,6 +177,11 @@ export default function Home() {
       : setCart([...cart, data]);
   }
 
+  async function add_detail(data: any) {
+    console.log([data]);
+    setDetail([data]);
+  }
+
   async function sendFlexMessage(data: any) {
     try {
       const res = await axios({
@@ -196,11 +201,11 @@ export default function Home() {
     }
   }
 
-  function handleOpenDrawer(type: "favorite" | "cart" | "profile") {
+  function handleOpenDrawer(type: "favorite" | "cart" | "profile" | "detail") {
     if (type === "favorite" || type === "cart") {
       setModalPosition("bottom");
     }
-    if (type === "profile") {
+    if (type === "profile" || type === "detail") {
       setModalPosition("right");
     }
     setModalType(type);
@@ -210,6 +215,7 @@ export default function Home() {
   function scrollToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+
   return (
     <>
       {user ? (
@@ -271,7 +277,13 @@ export default function Home() {
                         className="grid grid-cols-12 gap-4 w-full rounded-xl p-3 bg-indigo-50 overflow-hidden"
                       >
                         <div className="col-span-3 h-full">
-                          <div className="flex w-full relative rounded-xl overflow-hidden">
+                          <div
+                            className="flex w-full relative rounded-xl overflow-hidden"
+                            onClick={() => {
+                              handleOpenDrawer("detail");
+                              add_detail(item);
+                            }}
+                          >
                             <LazyLoadImage
                               effect="opacity"
                               src={item?.url}
@@ -292,7 +304,7 @@ export default function Home() {
                           <div className="flex">
                             <div className="flex items-center gap-2">
                               <MinusCircleOutlined
-                                className="text-lg cursor-pointer"
+                                className="text-base cursor-pointer"
                                 onClick={() => {
                                   cart[cart.indexOf(item)].quantity > 1
                                     ? cart[cart.indexOf(item)].quantity--
@@ -306,7 +318,7 @@ export default function Home() {
                                   cart[cart.indexOf(item)].quantity++;
                                   setCart([...cart]);
                                 }}
-                                className="text-lg cursor-pointer"
+                                className="text-base cursor-pointer"
                               />
                             </div>
                           </div>
@@ -326,14 +338,73 @@ export default function Home() {
                   style={{ width: "inherit" }}
                 >
                   <Button
+                    disabled={cart && cart.length == 0}
                     type="primary"
-                    className="w-full bg-indigo-500 hover:bg-indigo-600"
+                    className="w-full bg-indigo-500 disabled:bg-indigo-300 hover:bg-indigo-600"
                     onClick={() => {
                       sendFlexMessage(cart);
                       setModalOpen(false);
                     }}
                   >
                     Checkout
+                  </Button>
+                </Space.Compact>
+              </div>
+            </div>
+
+            <div
+              id="detail"
+              className={modalType == "detail" ? "-h-full relative" : "hidden"}
+            >
+              <div>
+                <div className="flex w-full relative rounded-xl overflow-hidden">
+                  <LazyLoadImage
+                    effect="opacity"
+                    src={detail[0]?.url}
+                    className="object-cover aspect-square absolute top-0 left-0 w-full h-full"
+                  />
+                  <div className="aspect-square w-full h-full bg-gray-100"></div>
+                </div>
+                <div className="-card-body pt-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="font-bold text-2xl text-indigo-700">
+                      ${detail[0]?.breeds[0].price ?? 0}
+                    </h2>
+                  </div>
+                  <h1 className="text-xl font-bold pt-2">
+                    {detail[0]?.breeds[0]?.name}
+                  </h1>
+                  <p className="text-gray-500 pt-1">
+                    {detail[0]?.breeds[0]?.description}
+                  </p>
+                </div>
+              </div>
+              <div
+                className="fixed w-full bg-indigo-50 bottom-0"
+                style={{ marginLeft: "-1.5rem" }}
+              >
+                <Space.Compact
+                  block
+                  className="w-full p-4 bg-indigo-50 rounded shadow-lg"
+                  size="large"
+                  style={{ width: "inherit" }}
+                >
+                  <Button
+                    type="primary"
+                    className="w-4/5 bg-indigo-500 hover:bg-indigo-600"
+                    onClick={() => {}}
+                  >
+                    Send Message
+                  </Button>
+                  <Button
+                    type="primary"
+                    className="w-1/5 bg-indigo-500 hover:bg-indigo-600 before:bg-indigo-300"
+                    onClick={() => {
+                      add_cart(detail[0]);
+                      setModalOpen(false);
+                    }}
+                  >
+                    <ShoppingCartOutlined className="text-xl inline-flex" />
                   </Button>
                 </Space.Compact>
               </div>
@@ -368,7 +439,9 @@ export default function Home() {
                 items={cats}
                 add_favorite={add_favorite_cat}
                 add_cart={add_cart}
+                add_detail={add_detail}
                 favorite={favorite}
+                open_drawer={handleOpenDrawer}
                 cart={cart}
               />
             )}
@@ -391,6 +464,8 @@ export default function Home() {
                         items={data}
                         add_favorite={add_favorite_cat}
                         add_cart={add_cart}
+                        add_detail={add_detail}
+                        open_drawer={handleOpenDrawer}
                         favorite={favorite}
                         cart={cart}
                       />
